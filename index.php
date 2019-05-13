@@ -51,6 +51,7 @@ function woocommerce_paywith_jeeb_init(){
             $this -> test = $this -> settings['test'];
             $this -> base_cur = $this -> settings['basecoin'];
             $this -> lang = $this -> settings['lang'];
+            $this -> allow_reject = $this -> settings['allowrefund'];
             $this -> target_cur = null;
             // if($this -> base_cur == 'toman')
             for($i=0;$i<sizeof($this -> settings['targetcoin']);$i++){
@@ -139,11 +140,16 @@ function woocommerce_paywith_jeeb_init(){
                        'fa'   =>'Persian'
                       ),
                     ),
-          'test' => array(
-        				    'title'   => __( 'Test Jeeb', 'wcjeeb' ),
-        				    'type'    => 'checkbox',
-        				    'label'   => __( 'Connect to the Test Jeeb server for testing.', 'wcjeeb' ),
-        				    'default' => 'no')
+                  'allowrefund' => array(
+                    'title'   => 'Allow Refund',
+                    'type'    => 'checkbox',
+                    'label'   => 'Allowing payments to be refunded.',
+                    'default' => 'yes'),
+                  'test' => array(
+                            'title'   => __( 'Test Jeeb', 'wcjeeb' ),
+                            'type'    => 'checkbox',
+                            'label'   => __( 'Connect to the Test Jeeb server for testing.', 'wcjeeb' ),
+                            'default' => 'no')
             );
         }
 
@@ -195,7 +201,7 @@ function woocommerce_paywith_jeeb_init(){
               "coins"        => $this -> target_cur,
               "webhookUrl"   => $this -> notify_url,
               "callBackUrl"  => $this -> get_return_url(),
-              "allowReject"  => $this -> test === 'yes' ? false : true,
+              "allowReject"  => $this -> allow_reject === 'yes' ? true : false,
               "allowTestNet" => $this -> test === 'yes' ? true : false,
               "language"     => $this -> lang
             );
