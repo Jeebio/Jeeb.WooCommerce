@@ -73,9 +73,7 @@ function woocommerce_paywith_jeeb_init(){
             add_action('woocommerce_receipt_'.$this->id, array(&$this, 'receipt_page'));
 
             //Payment Listener/API hook
-            add_action('init', array(&$this, 'paywith_jeeb_response'));
-            //update for woocommerce >2.0
-            add_action( 'woocommerce_api_' . strtolower( get_class( $this ) ), array( $this, 'paywith_jeeb_response' ) );
+            add_action('init', array(&$this, 'payment_response'));
 
             add_action('woocommerce_thankyou_order_received_text', array( &$this, 'payment_response'));
 
