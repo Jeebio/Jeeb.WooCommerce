@@ -369,13 +369,13 @@ function jeeb_payment_gateway_init()
                 echo "Your Payment was expired. To pay again please go to checkout page.";
                 $order->add_order_note(__('Payment was unsuccessful', 'wcjeeb'));
                 // Cancel order
-                $order->cancel_order('Bitcoin payment expired.');
+                $order->cancel_order('Payment wasn\'t made by the user and the invoice was expired.');
             }
             if ($_REQUEST["stateId"] == 7) {
                 echo "Partial payment Received";
                 $order->add_order_note(__('Partial Payment was received', 'wcjeeb'));
                 // Partial order received, waiting for full payment
-                $order->cancel_order(__('Partial Payment was received, hence the payment was rejected.', 'wcjeeb'));
+                $order->update_status('refunded', __('Partial payment recieved, payment was refunded', 'wcjeeb'));
             }
 
         }
@@ -456,11 +456,13 @@ function jeeb_payment_gateway_init()
                     $order->add_order_note(__('Notification from Jeeb - Payment was expired', 'wcjeeb'));
                     error_log("Notification from Jeeb - Payment was expired");
                 } else if ($json['stateId'] == 6) {
-                    $order->add_order_note(__('Notification from Jeeb - Over payment occurred', 'wcjeeb'));
+                    $order->add_order_note(__('Notification from Jeeb - Over payment occurred, payment was refunded.', 'wcjeeb'));
                     error_log("Notification from Jeeb - Over payment occurred");
+                    $order->update_status('refunded', __('Partial payment recieved, payment was refunded', 'wcjeeb'));
                 } else if ($json['stateId'] == 7) {
-                    $order->add_order_note(__('Notification from Jeeb - Under payment occurred', 'wcjeeb'));
+                    $order->add_order_note(__('Notification from Jeeb - Under payment occurred, payment was refunded.', 'wcjeeb'));
                     error_log("Notification from Jeeb - Under payment occurred");
+                    $order->update_status('refunded', __('Partial payment recieved, payment was refunded', 'wcjeeb'));
                 } else {
                     $order->add_order_note(__('Notification from Jeeb could not be proccessed - Error in reading state Id ', 'wcjeeb'));
                     error_log("Notification from Jeeb could not be proccessed - Error in reading state Id");
