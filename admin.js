@@ -10,23 +10,23 @@ function JeebCtr(curBtnUrl) {
 
 JeebCtr.prototype.init = function () {
     jQuery("#jeeb-form-table tbody tr:last").remove();
-    var culture = jQuery("#woocommerce_paywithjeeb_btnlang").val();
-    var theme = jQuery("#woocommerce_paywithjeeb_btntheme").val();
+    var culture = jQuery("#woocommerce_jeebpaymentgateway_btnlang").val();
+    var theme = jQuery("#woocommerce_jeebpaymentgateway_btntheme").val();
     this.load(culture, theme);
 }
 
 JeebCtr.prototype.onChange = function () {
-    var culture = jQuery("#woocommerce_paywithjeeb_btnlang").val();
-    var theme = jQuery("#woocommerce_paywithjeeb_btntheme").val();
+    var culture = jQuery("#woocommerce_jeebpaymentgateway_btnlang").val();
+    var theme = jQuery("#woocommerce_jeebpaymentgateway_btntheme").val();
     this.load(culture, theme);
 };
 
 JeebCtr.prototype.bind = function () {
     const self = this;
-    jQuery("#woocommerce_paywithjeeb_btnlang").change(function () {
+    jQuery("#woocommerce_jeebpaymentgateway_btnlang").change(function () {
         self.onChange();
     });
-    jQuery("#woocommerce_paywithjeeb_btntheme").change(function () {
+    jQuery("#woocommerce_jeebpaymentgateway_btntheme").change(function () {
         self.onChange();
     });
 };
@@ -49,7 +49,7 @@ JeebCtr.prototype.load = function (culture, theme) {
 JeebCtr.prototype.populate = function (buttons) {
     var raw = "<tr valign=\"top\" id=\"jeeb-buttons-row\">" +
         "<th scope=\"row\" class=\"titledesc\">" +
-        "<label for=\"woocommerce_paywithjeeb_btnurl\">Button </label>" +
+        "<label for=\"woocommerce_jeebpaymentgateway_btnurl\">Checkout Button </label>" +
         "</th>" +
         "<td class=\"forminp jeeb-buttons-container\">" +
         "<fieldset>" +
@@ -57,7 +57,7 @@ JeebCtr.prototype.populate = function (buttons) {
         "</fieldset>" +
         "</td>" +
         "</tr>";
-    var name = "woocommerce_paywithjeeb_btnurl";
+    var name = "woocommerce_jeebpaymentgateway_btnurl";
     var content = "";
     var hasCurBtnUrl = !!this.curBtnUrl;
     var curBtnIndex = -1;
@@ -68,6 +68,7 @@ JeebCtr.prototype.populate = function (buttons) {
                 break;
             }
     }
+    
     for (var index = 0; index < buttons.length; index++) {
         var checked = curBtnIndex >= 0
             ? (curBtnIndex === index ? true : false)
@@ -80,8 +81,15 @@ JeebCtr.prototype.populate = function (buttons) {
             "<br/>";
     }
 
-    var raw = raw.replace("{0}", content)
+    raw = raw.replace("{0}", content)
     jQuery("#jeeb-buttons-row").remove();
     jQuery("#jeeb-form-table tbody").append(raw);
 }
+
+jQuery(document).ready(function() {
+    const curBtnUrl = jQuery("#jeebCurBtnUrl").val();
+    const jeeb = new JeebCtr(curBtnUrl);
+    jeeb.bind();
+});
+
 

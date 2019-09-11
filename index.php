@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Exit if accessed directly
-add_action('plugins_loaded', 'woocommerce_paywith_jeeb_init', 0);
+add_action('plugins_loaded', 'jeeb_payment_gateway_init', 0);
 
 // Load dependencies
 add_action('admin_enqueue_scripts', 'admin_scripts', 999);
@@ -25,14 +25,14 @@ function admin_scripts()
     }
 }
 
-function woocommerce_paywith_jeeb_init()
+function jeeb_payment_gateway_init()
 {
 
     if (!class_exists('WC_Payment_Gateway')) {
         return;
     }
 
-    class WC_Paywith_Jeeb extends WC_Payment_Gateway
+    class WC_Jeeb_Payment_Gateway extends WC_Payment_Gateway
     {
 
         public function error_log($contents)
@@ -52,8 +52,9 @@ function woocommerce_paywith_jeeb_init()
 
         public function __construct()
         {
-            $this->id = 'paywithjeeb';
-            $this->method_title = 'Pay with Jeeb';
+            $this->id = 'jeebpaymentgateway';
+            $this->method_title = 'Jeeb Payment Gateway';
+            $this->method_description = 'Accept BTC and other famous cryptocurrencies.';
             $this->has_fields = false;
 
             $this->init_form_fields();
@@ -61,53 +62,60 @@ function woocommerce_paywith_jeeb_init()
             $this->init_plugin();
 
             //Actions
-            if ( version_compare( WOOCOMMERCE_VERSION, '2.0.0', '>=' ) ) {
-                add_action( 'woocommerce_update_options_payment_gateways_'.$this->id, array(&$this, 'process_admin_options' ) );
+            if (version_compare(WOOCOMMERCE_VERSION, '2.0.0', '>=')) {
+                add_action('woocommerce_update_options_payment_gateways_' . $this->id, array(&$this, 'process_admin_options'));
             } else {
-                add_action( 'woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options' ) );
+                add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
             }
 
-
-            add_action('woocommerce_receipt_'.$this->id, array(&$this, 'receipt_page'));
+            add_action('woocommerce_receipt_' . $this->id, array(&$this, 'receipt_page'));
 
             //Payment Listener/API hook
             add_action('init', array(&$this, 'payment_response'));
 
-            add_action('woocommerce_thankyou_order_received_text', array( &$this, 'payment_response'));
+            add_action('woocommerce_thankyou_order_received_text', array(&$this, 'payment_response'));
 
-            add_action('woocommerce_api_wc_paywith_jeeb', array($this, 'ipn_callback'));
+            add_action('woocommerce_api_wc_jeeb_payment_gateway', array($this, 'ipn_callback'));
         }
 
-        function init_plugin() {
-          if(false === isset($this -> settings['expirationTime'])||$this -> settings['expirationTime']<15||$this -> settings['expirationTime']>15)
-                $this -> settings['expirationTime']=15;
+        function init_plugin()
+        {
 
-            $this -> icon = $this -> settings['btnurl'] . '" class="jeeb_logo"';
-            $this -> order_button_text = __('Pay with Jeeb', 'woocommerce-gateway-paywith_jeeb');
-            $this -> title = $this -> settings['title'];
-            $this -> description = $this -> settings['description'];
-            $this -> signature = $this -> settings['signature'];
-            $this -> notify_url = WC()->api_request_url('WC_Paywith_Jeeb');
-            $this -> base_url = "https://core.jeeb.io/api/";
-            $this -> test = $this -> settings['test'];
-            $this -> base_cur = $this -> settings['basecoin'];
-            $this -> lang = $this -> settings['lang'];
-            $this -> allow_reject = $this -> settings['allowrefund'];
-            $this -> expirationTime = $this -> settings['expirationTime'];
-            $this -> target_cur = null;
-
-
-            for($i=0;$i<sizeof($this -> settings['targetcoin']);$i++){
-              $this -> target_cur .= $this -> settings['targetcoin'][$i];
-              if( $i!=sizeof($this -> settings['targetcoin'])-1) {
-                $this -> target_cur .= '/';
-              }
+            if (isset($this->settings['expiration_time']) === false ||
+                is_numeric($this->settings['expiration_time']) === false ||
+                $this->settings['expiration_time'] < 15 ||
+                $this->settings['expiration_time'] > 2880) {
+                $this->settings['expiration_time'] = 15;
             }
 
+            $this->title = $this->settings['title'];
+            $this->description = $this->settings['description'];
+            $this->signature = $this->settings['signature'];
+            $this->notify_url = WC()->api_request_url('WC_Jeeb_Payment_Gateway');
+            $this->base_url = "https://core.jeeb.io/api/";
+            $this->test = $this->settings['test'];
+            $this->base_cur = $this->settings['basecoin'];
+            $this->lang = $this->settings['lang'];
+            $this->allow_reject = $this->settings['allowrefund'];
+            $this->expiration_time = $this->settings['expiration_time'];
+            $this->target_cur = null;
 
-            if($this -> lang === 'none')
-              $this -> lang = NULL;
+            $this->icon = $this->settings['btnurl'] . '" class="jeeb_logo"';
+            $this->order_button_text = __('Jeeb', 'woocommerce-jeeb-payment-gateway');
+
+            for ($i = 0; $i < sizeof($this->settings['targetcoin']); $i++) {
+                $this->target_cur .= $this->settings['targetcoin'][$i];
+                if ($i != sizeof($this->settings['targetcoin']) - 1) {
+                    $this->target_cur .= '/';
+                }
+            }
+
+            if ($this->lang === 'none') {
+                $this->lang = null;
+            }
+
         }
+
         function init_form_fields()
         {
 
@@ -115,56 +123,61 @@ function woocommerce_paywith_jeeb_init()
                 'enabled' => array(
                     'title' => 'Enable/Disable',
                     'type' => 'checkbox',
-                    'label' => 'Enables Jeeb\'s Module.',
+                    'label' => 'Enables Jeeb Payment Gateway Module.',
                     'default' => 'no'),
+
                 'title' => array(
                     'title' => 'Title',
                     'type' => 'text',
-                    'description' => 'This controls the title which the user sees during checkout.',
-                    'default' => 'Pay With Jeeb'),
+                    'description' => 'It controls the title which users see during checkout.',
+                    'default' => 'Pay with Jeeb'),
+
                 'description' => array(
                     'title' => 'Description',
                     'type' => 'textarea',
-                    'description' => 'This controls the description which the user sees during checkout.',
+                    'description' => 'It controls the description which users see during checkout.',
                     'default' => 'Pay securely with bitcoins through Jeeb Payment Gateway.'),
+
                 'signature' => array(
                     'title' => 'Signature',
                     'type' => 'text',
-                    'description' => 'This signature is the one provided by Jeeb.'),
+                    'description' => 'The signature provided by Jeeb for you merchant.'),
+
                 'basecoin' => array(
-                    'title' => 'Base-Currency',
+                    'title' => 'Base Currency',
                     'type' => 'select',
                     'description' => 'The base currency of your website.',
                     'options' => array(
-                        'btc' => 'BTC',
-                        'eur' => 'EUR',
-                        'irr' => 'IRR',
-                        'toman' => 'TOMAN',
-                        'usd' => 'USD',
+                        'btc' => 'BTC (Bitcoin)',
+                        'usd' => 'USD (US Dollar)',
+                        'eur' => 'EUR (Euro)',
+                        'irr' => 'IRR (Iranian Rial)',
+                        'toman' => 'TOMAN (Iranian Toman)',
                     ),
                 ),
                 'targetcoin' => array(
-                    'title' => 'Target-Currency',
+                    'title' => 'Payable Currencies',
                     'type' => 'multiselect',
                     'class' => 'jeeb-customized-multiselect',
-                    'description' => 'The target currency to which your base currency will get converted.',
+                    'description' => 'The currencies which users can use for payments.',
                     'options' => array(
                         'btc' => 'BTC',
+                        'ltc' => 'LTC',
                         'eth' => 'ETH',
                         'xrp' => 'XRP',
                         'xmr' => 'XMR',
                         'bch' => 'BCH',
-                        'ltc' => 'LTC',
                         'test-btc' => 'TEST-BTC',
+                        'test-ltc' => 'TEST-LTC',
                     ),
                 ),
 
                 'lang' => array(
                     'title' => 'Language',
                     'type' => 'select',
-                    'description' => 'Set the language of the payment portal.',
+                    'description' => 'The language of the payment area.',
                     'options' => array(
-                        'none' => 'Auto-Select',
+                        'none' => 'Auto',
                         'en' => 'English',
                         'fa' => 'Persian',
                     ),
@@ -172,33 +185,33 @@ function woocommerce_paywith_jeeb_init()
                 'allowrefund' => array(
                     'title' => 'Allow Refund',
                     'type' => 'checkbox',
-                    'label' => 'Allowing payments to be refunded.',
+                    'label' => 'Allows payments to be refunded.',
                     'default' => 'yes'),
 
                 'test' => array(
-                    'title' => __('Test Jeeb', 'wcjeeb'),
+                    'title' => 'Allow TestNets',
                     'type' => 'checkbox',
-                    'label' => __('Connect to the Test Jeeb server for testing.', 'wcjeeb'),
+                    'label' => 'Allows testnets such as TEST-BTC to get processed.',
                     'default' => 'no'),
 
-                'expirationTime' => array(
+                'expiration_time' => array(
                     'title' => 'Expiration Time',
                     'type' => 'text',
-                    'description' => 'It should be between 15 to 2880 (mins).'),
+                    'description' => 'Expands default payments expiration time. It should be between 15 to 2880 (mins).'),
 
                 'btnlang' => array(
-                    'title' => 'Button Language',
+                    'title' => 'Checkout Button Language',
                     'type' => 'select',
-                    'description' => 'Invoice button preferred language.',
+                    'description' => 'Jeeb\'s checkout button preferred language.',
                     'options' => array(
                         'en' => 'English',
                         'fa' => 'Persian',
                     ),
                 ),
                 'btntheme' => array(
-                    'title' => 'Button Theme',
+                    'title' => 'Checkout Button Theme',
                     'type' => 'select',
-                    'description' => 'Invoice button preferred theme.',
+                    'description' => 'Jeeb\'s checkout button preferred theme.',
                     'options' => array(
                         'transparent' => 'Transparent',
                         'blue' => 'Blue',
@@ -210,22 +223,15 @@ function woocommerce_paywith_jeeb_init()
             );
         }
 
-
         public function admin_options()
         {
-            echo '<h3>Pay With Jeeb Payment Gateway</h3>';
-            echo '<p>Jeeb is most popular payment gateway for online shopping in Iran.</p>';
+            echo '<h3><span><img class="jeeb-logo" src="https://jeeb.io/cdn/en/trans-blue-jeeb.svg"></img</span> Payment Gateway Settings</h3>';
+            echo '<p>The first Iranian platform for accepting and processing cryptocurrencies payments.</p>';
             echo '<table class="form-table" id="jeeb-form-table">';
             // Generate the HTML For the settings form.
             $this->generate_settings_html();
             echo '</table>';
-            echo '<script>
-                document.addEventListener("DOMContentLoaded", function(event) {
-                    var jeeb = new JeebCtr("' . $this->settings['btnurl'] . '");
-                    jeeb.bind();
-                });
-            </script>';
-
+            echo '<input type="hidden" name="jeebCurBtnUrl" id="jeebCurBtnUrl" value="' . $this->settings['btnurl'] . '"/>';
         }
         // Get bitcoin equivalent to irr
         function convert_base_to_target($order_id)
@@ -265,12 +271,12 @@ function woocommerce_paywith_jeeb_init()
                 "orderNo" => $order_id,
                 "value" => $amount,
                 "coins" => $this->target_cur,
-                "expirationTime" => $this->expirationTime,
                 "webhookUrl" => $this->notify_url,
                 "callBackUrl" => $this->get_return_url(),
                 "allowReject" => $this->allow_reject === 'yes' ? true : false,
                 "allowTestNet" => $this->test === 'yes' ? true : false,
                 "language" => $this->lang,
+                "expiration" => $this->expiration_time,
             );
             $data_string = json_encode($data);
 
@@ -286,7 +292,7 @@ function woocommerce_paywith_jeeb_init()
                     'method' => 'POST',
                     'timeout' => 45,
                     'headers' => array("content-type" => "application/json",
-                                       "user-agent"   => "woocommerce/3.0"),
+                    'user-agent' => "woocommerce/3.0"),
                     'body' => $data_string,
                 )
             );
@@ -469,11 +475,11 @@ function woocommerce_paywith_jeeb_init()
 
     /* Add the Gateway to WooCommerce */
 
-    function woocommerce_add_paywith_jeeb_gateway($methods)
+    function woocommerce_add_jeeb_payment_gateway($methods)
     {
-        $methods[] = 'WC_Paywith_Jeeb';
+        $methods[] = 'WC_Jeeb_Payment_Gateway';
         return $methods;
     }
 
-    add_filter('woocommerce_payment_gateways', 'woocommerce_add_paywith_jeeb_gateway');
+    add_filter('woocommerce_payment_gateways', 'woocommerce_add_jeeb_payment_gateway');
 }

@@ -7,5 +7,9 @@
 }
 
 .jeeb-customized-multiselect {
-    height: 180px !important;
+    height: 200px !important;
+}
+
+.jeeb-logo {
+    height: 24px;
 }
