@@ -1,14 +1,14 @@
-WooCommerce-Pay With Jeeb
+WooCommerce Jeeb Payment Gateway Module
 ====================
 
-A module to enable payment with cryptocurrency via Jeeb's payment gateway.
+A module to enable payments with cryptocurrencies using Jeeb Payment Gateway.
 
 Installation Instructions:
 ====================
 
 * Ensure you have the latest WooCommerce plugin installed in your WordPress installation.
 * Copy the files contained in this repository to the following directory in your WordPress installation:
-`\wp-content\plugins\paywithjeeb-woocommerce\`
+`\wp-content\plugins\Jeeb.WooCommerce.*\`
 * Once installed, you must activate the WooCommerce Pay With Jeeb plugin using the Plugin section of the WordPress administration console.
 * To configure Jeeb, use the WordPress administration console and go to WooCommerce > Settings > Checkout > Pay With Jeeb.
 * You will need to provide an Signature from the Jeeb portal.

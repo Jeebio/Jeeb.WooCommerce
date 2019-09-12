@@ -1,0 +1,15 @@
+.jeeb-buttons-container {
+    display: block;
+    width: 390px;
+    border-radius: 5px;
+    background: #ddd;
+    text-align: center;
+}
+
+.jeeb-customized-multiselect {
+    height: 200px !important;
+}
+
+.jeeb-logo {
+    height: 24px;
+}
