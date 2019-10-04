@@ -115,11 +115,15 @@ function jeeb_payment_gateway_init()
 
             $this->icon = $this->settings['btnurl'] . '" class="jeeb_logo"';
 
-            for ($i = 0; $i < sizeof($this->settings['targetcoin']); $i++) {
-                $this->target_cur .= $this->settings['targetcoin'][$i];
-                if ($i != sizeof($this->settings['targetcoin']) - 1) {
-                    $this->target_cur .= '/';
+            if (is_array($this->settings['targetcoin'])) {
+                for ($i = 0; $i < sizeof($this->settings['targetcoin']); $i++) {
+                    $this->target_cur .= $this->settings['targetcoin'][$i];
+                    if ($i != sizeof($this->settings['targetcoin']) - 1) {
+                        $this->target_cur .= '/';
+                    }
                 }
+            } else {
+                $this->target_cur = 'BTC';
             }
 
             if ($this->lang === 'none') {
