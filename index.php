@@ -45,7 +45,7 @@ function jeeb_payment_gateway_init()
     class WC_Jeeb_Payment_Gateway extends WC_Payment_Gateway
     {
         const PLUGIN_NAME = 'woocommerce';
-        const PLUGIN_VERSION = '3.0';
+        const PLUGIN_VERSION = '3.1';
 
         public function error_log($contents)
         {
