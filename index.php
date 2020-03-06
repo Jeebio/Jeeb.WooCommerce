@@ -4,7 +4,7 @@
 Plugin Name: WooCommerce Jeeb Payment Gateway
 Plugin URI: https://jeeb.io/
 Description: Jeeb payment gateway for WooCommerce
-Version: 3.0.0
+Version: 3.2.0
 Author: Jeeb
  */
 
@@ -45,7 +45,7 @@ function jeeb_payment_gateway_init()
     class WC_Jeeb_Payment_Gateway extends WC_Payment_Gateway
     {
         const PLUGIN_NAME = 'woocommerce';
-        const PLUGIN_VERSION = '3.1';
+        const PLUGIN_VERSION = '3.2';
 
         public function error_log($contents)
         {
@@ -197,12 +197,14 @@ function jeeb_payment_gateway_init()
                     'description' => 'The currencies which users can use for payments.',
                     'options' => array(
                         'btc' => 'BTC',
+                        'doge' => 'DOGE',
                         'ltc' => 'LTC',
                         'eth' => 'ETH',
                         'xrp' => 'XRP',
                         'xmr' => 'XMR',
                         'bch' => 'BCH',
                         'test-btc' => 'TEST-BTC',
+                        'test-doge' => 'TEST-DOGE',
                         'test-ltc' => 'TEST-LTC',
                     ),
                 ),
@@ -417,8 +419,6 @@ function jeeb_payment_gateway_init()
                 echo "<h3>Thank you!</h3><p>We're waiting for your transaction to gets confirmed. Please be patient.</p>";
             } else if ($_REQUEST["stateId"] == 5) {
                 echo "<h3>Oops!</h3><p>Your Payment is expired or canceled. To pay again please go to checkout page.</p>";
-            } else {
-                echo '<h3>We\'re sorry!</h3><p>An unknown state occurred in your payment. Please contact our support and report the incident.</p>';
             }
         }
 
