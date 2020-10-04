@@ -10,23 +10,23 @@ function JeebCtr(curBtnUrl) {
 
 JeebCtr.prototype.init = function () {
     jQuery("#jeeb-form-table tbody tr:last").remove();
-    var culture = jQuery("#woocommerce_jeebpaymentgateway_btnlang").val();
-    var theme = jQuery("#woocommerce_jeebpaymentgateway_btntheme").val();
+    var culture = jQuery("#woocommerce_jeebpaymentgateway_btnLang").val();
+    var theme = jQuery("#woocommerce_jeebpaymentgateway_btnTheme").val();
     this.load(culture, theme);
 }
 
 JeebCtr.prototype.onChange = function () {
-    var culture = jQuery("#woocommerce_jeebpaymentgateway_btnlang").val();
-    var theme = jQuery("#woocommerce_jeebpaymentgateway_btntheme").val();
+    var culture = jQuery("#woocommerce_jeebpaymentgateway_btnLang").val();
+    var theme = jQuery("#woocommerce_jeebpaymentgateway_btnTheme").val();
     this.load(culture, theme);
 };
 
 JeebCtr.prototype.bind = function () {
     const self = this;
-    jQuery("#woocommerce_jeebpaymentgateway_btnlang").change(function () {
+    jQuery("#woocommerce_jeebpaymentgateway_btnLang").change(function () {
         self.onChange();
     });
-    jQuery("#woocommerce_jeebpaymentgateway_btntheme").change(function () {
+    jQuery("#woocommerce_jeebpaymentgateway_btnTheme").change(function () {
         self.onChange();
     });
 };
@@ -57,7 +57,7 @@ JeebCtr.prototype.populate = function (buttons) {
         "</fieldset>" +
         "</td>" +
         "</tr>";
-    var name = "woocommerce_jeebpaymentgateway_btnurl";
+    var name = "woocommerce_jeebpaymentgateway_btnUrl";
     var content = "";
     var hasCurBtnUrl = !!this.curBtnUrl;
     var curBtnIndex = -1;
