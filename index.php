@@ -1,17 +1,20 @@
 <?php
 
 /*
-Plugin Name: WooCommerce Jeeb Payment Gateway
-Plugin URI: https://jeeb.io/
-Description: Jeeb payment gateway for WooCommerce
-Version: 3.3
-Author: Jeeb
+  Plugin Name: WooCommerce Jeeb Payment Gateway
+  Plugin URI: https://jeeb.io/
+  Description: Jeeb payment gateway for WooCommerce
+  Version: 3.4
+  Author: Jeeb
+  WC requires at least: 3.0.0
+  WC tested up to: 4.8.0
  */
 
 /**
  * Exit if accessed directly
  */
-if (!defined('ABSPATH')) {
+if (!defined('ABSPATH'))
+{
     exit;
 }
 
@@ -19,6 +22,7 @@ if (!defined('ABSPATH')) {
  * registers WC_Jeeb_Payment_Gateway class as a WooCommerce payment gateway
  */
 add_filter('woocommerce_payment_gateways', 'jeen_add_woocommerce_payment_gateway');
+
 function jeen_add_woocommerce_payment_gateway($gateways)
 {
     $gateways[] = 'WC_Jeeb_Payment_Gateway';
@@ -27,15 +31,18 @@ function jeen_add_woocommerce_payment_gateway($gateways)
 
 /* Implement our desired class */
 add_action('plugins_loaded', 'jeeb_init_payment_gateway', 0);
+
 function jeeb_init_payment_gateway()
 {
 
-    if (!class_exists('WC_Payment_Gateway')) {
+    if (!class_exists('WC_Payment_Gateway'))
+    {
         return;
     }
 
     class WC_Jeeb_Payment_Gateway extends WC_Payment_Gateway
     {
+
         const PLUGIN_NAME = 'woocommerce';
         const PLUGIN_VERSION = '4.0';
 
@@ -77,34 +84,29 @@ function jeeb_init_payment_gateway()
                     'label' => 'Enables Jeeb Payment Gateway Module.',
                     'default' => 'no',
                 ),
-
                 'title' => array(
                     'title' => 'Title',
                     'type' => 'text',
                     'description' => 'It controls the title of payment method which users see during checkout.',
                     'default' => 'Jeeb',
                 ),
-
                 'description' => array(
                     'title' => 'Description',
                     'type' => 'textarea',
                     'description' => 'It controls the description of payment method which users see during checkout.',
                     'default' => 'Pay securely with bitcoins through Jeeb Payment Gateway.',
                 ),
-
                 'content' => array(
                     'title' => 'Checkout',
                     'type' => 'text',
                     'description' => 'It controls the content of checkout button which users see during checkout.',
                     'default' => 'Pay with Jeeb',
                 ),
-
                 'apikey' => array(
                     'title' => 'API Key',
                     'type' => 'text',
                     'description' => 'The API Key that is provided by Jeeb for your merchant.',
                 ),
-
                 'baseCurrency' => array(
                     'title' => 'Base Currency',
                     'type' => 'select',
@@ -126,7 +128,6 @@ function jeeb_init_payment_gateway()
                     ),
                     'default' => 'IRT',
                 ),
-
                 'payableCurrencies' => array(
                     'title' => 'Payable Currencies',
                     'type' => 'multiselect',
@@ -148,7 +149,6 @@ function jeeb_init_payment_gateway()
                     ),
                     'default' => '',
                 ),
-
                 'lang' => array(
                     'title' => 'Language',
                     'type' => 'select',
@@ -159,27 +159,23 @@ function jeeb_init_payment_gateway()
                         'fa' => 'Persian',
                     ),
                 ),
-
                 'allowRefund' => array(
                     'title' => 'Allow Refund',
                     'type' => 'checkbox',
                     'label' => 'Allows payments to be refunded.',
                     'default' => 'yes',
                 ),
-
                 'test' => array(
                     'title' => 'Allow TestNets',
                     'type' => 'checkbox',
                     'label' => 'Allows testnets such as TBTC to get processed.',
                     'default' => 'no',
                 ),
-
                 'expiration' => array(
                     'title' => 'Expiration Time',
                     'type' => 'text',
                     'description' => 'Expands default payments expiration time. It should be between 15 to 2880 (mins).',
                 ),
-
                 'btnLang' => array(
                     'title' => 'Checkout Button Language',
                     'type' => 'select',
@@ -189,7 +185,6 @@ function jeeb_init_payment_gateway()
                         'fa' => 'Persian',
                     ),
                 ),
-
                 'btnTheme' => array(
                     'title' => 'Checkout Button Theme',
                     'type' => 'select',
@@ -200,26 +195,27 @@ function jeeb_init_payment_gateway()
                         'transparent' => 'Transparent',
                     ),
                 ),
-
                 'btnUrl' => array('type' => 'text'),
-
             );
         }
 
-        private function run_hooks() {
+        private function run_hooks()
+        {
             /* Add the Gateway to WooCommerce */
-            if (version_compare(WOOCOMMERCE_VERSION, '2.0.0', '>=')) {
-                add_action('woocommerce_update_options_payment_gateways_' . $this->id, array(&$this, 'process_admin_options'));
-            } else {
-                add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
+            if (version_compare(WOOCOMMERCE_VERSION, '2.0.0', '>='))
+            {
+                add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
+            } else
+            {
+                add_action('woocommerce_update_options_payment_gateways', array($this, 'process_admin_options'));
             }
 
-            add_action('woocommerce_receipt_' . $this->id, array(&$this, 'receipt_page'));
+            add_action('woocommerce_receipt_' . $this->id, array($this, 'receipt_page'));
 
             //Payment Listener/API hook
             add_action('init', array(&$this, 'process_response'));
 
-            add_action('woocommerce_thankyou_order_received_text', array(&$this, 'process_response'));
+            add_action('woocommerce_thankyou_order_received_text', array($this, 'process_response'));
 
             add_action('woocommerce_api_jeeb_notifications', array($this, 'process_webhook'));
 
@@ -228,13 +224,15 @@ function jeeb_init_payment_gateway()
         }
 
         /* Prepare plugin options */
+
         private function get_options()
         {
 
             if (isset($this->settings['expiration']) === false ||
-                is_numeric($this->settings['expiration']) === false ||
-                $this->settings['expiration'] < 15 ||
-                $this->settings['expiration'] > 2880) {
+                    is_numeric($this->settings['expiration']) === false ||
+                    $this->settings['expiration'] < 15 ||
+                    $this->settings['expiration'] > 2880)
+            {
                 $this->settings['expiration'] = 15;
             }
 
@@ -252,20 +250,20 @@ function jeeb_init_payment_gateway()
             $this->icon = $this->settings['btnUrl'] . '" class="jeeb_logo"';
             $this->payable_currencies = "";
 
-            if ($this->settings['payableCurrencies']) {
+            if ($this->settings['payableCurrencies'])
+            {
                 $this->payable_currencies = implode('/', $this->settings['payableCurrencies']);
             }
 
-            if ($this->lang === 'none') {
+            if ($this->lang === 'none')
+            {
                 $this->lang = null;
             }
-
         }
 
         // Creates payments on Jeeb
         private function create_payment($order_id)
         {
-            global $woocommerce;
             $order = new WC_Order($order_id);
             $amount = $order->get_total();
 
@@ -290,23 +288,34 @@ function jeeb_init_payment_gateway()
             $url = $this->base_url . 'payments/issue/';
 
             $response = wp_remote_post(
-                $url,
-                array(
-                    'method' => 'POST',
-                    'timeout' => 120,
-                    'headers' => array(
-                        "content-type" => "application/json",
-                        "x-api-key" => $this->apikey,
-                    ),
-                    'user-agent' => self::PLUGIN_NAME . '/' . self::PLUGIN_VERSION,
-                    'body' => $data_string,
-                )
+                    $url,
+                    array(
+                        'method' => 'POST',
+                        'timeout' => 120,
+                        'headers' => array(
+                            "content-type" => "application/json",
+                            "x-api-key" => $this->apikey,
+                        ),
+                        'user-agent' => self::PLUGIN_NAME . '/' . self::PLUGIN_VERSION,
+                        'body' => $data_string,
+                    )
             );
-
-            $body = wp_remote_retrieve_body($response);
-            $data = json_decode($body, true);
-
-            return $data['result']['token'];
+            if (is_wp_error($response))
+            {
+                $error_message = $response->get_error_message();
+                return ['res' => 0, 'err' => $error_message];
+            } else
+            {
+                $body = wp_remote_retrieve_body($response);
+                $data2 = json_decode($body, true);
+                if (isset($data2['result']['token']))
+                {
+                    return ['res' => 1, 'token' => $data2['result']['token']];
+                } else
+                {
+                    return ['res' => 0, 'err' => print_r($body, true)];
+                }
+            }
         }
 
         // Confirms payments on Jeeb
@@ -320,38 +329,64 @@ function jeeb_init_payment_gateway()
             $url = $this->base_url . 'payments/seal';
 
             $response = wp_remote_post(
-                $url,
-                array(
-                    'method' => 'POST',
-                    'timeout' => 120,
-                    'headers' => array(
-                        "content-type" => "application/json",
-                        "x-api-key" => $this->apikey,
-                    ),
-                    'user-agent' => self::PLUGIN_NAME . '/' . self::PLUGIN_VERSION,
-                    'body' => $data_string,
-                )
+                    $url,
+                    array(
+                        'method' => 'POST',
+                        'timeout' => 120,
+                        'headers' => array(
+                            "content-type" => "application/json",
+                            "x-api-key" => $this->apikey,
+                        ),
+                        'user-agent' => self::PLUGIN_NAME . '/' . self::PLUGIN_VERSION,
+                        'body' => $data_string,
+                    )
             );
 
-            $body = wp_remote_retrieve_body($response);
+            if (is_wp_error($response))
+            {
+                $error_message = $response->get_error_message();
+                return ['res' => 0, 'err' => $error_message];
+            } else
+            {
+                $body = wp_remote_retrieve_body($response);
+                $data2 = json_decode($body, true);
 
-            return (bool) $body['result']['succeed'];
+                if (isset($data2['result']['succeed']))
+                {
+                    $res = (bool) $data2['result']['succeed'];
+                    return ['res' => $res, 'err' => ''];
+                } else
+                {
+                    return ['res' => false, 'err' => print_r($body, true)];
+                }
+            }
         }
 
         // Redirects users to Jeeb
         private function redirect_payment($token)
         {
             $redirect_url = $this->base_url . "payments/invoice?token=" . $token;
-            header('Location: ' . $redirect_url);
+            wp_redirect($redirect_url);
         }
 
         // Displaying text on the receipt page and sending requests to Jeeb server.
         public function receipt_page($order_id)
         {
+            $order = new WC_Order($order_id);
             $token = $this->create_payment($order_id);
 
-            // Redirect user to Jeeb
-            $this->redirect_payment($token);
+            if ($token['res'] == 1)
+            {
+                update_post_meta($order_id, '_jib_token', $token);
+                $this->redirect_payment($token);
+            } else
+            {
+                $note = $token['err'];
+                $order->add_order_note($note);
+                wc_add_notice($note, "error");
+
+                wp_redirect(wc_get_checkout_url());
+            }
         }
 
         // Process payment
@@ -362,10 +397,12 @@ function jeeb_init_payment_gateway()
 
             $order->update_status('pending', 'Awaiting for transaction on Jeeb.');
 
-            if (version_compare(WOOCOMMERCE_VERSION, '2.1.0', '>=')) {
+            if (version_compare(WOOCOMMERCE_VERSION, '2.1.0', '>='))
+            {
                 /* 2.1.0 */
                 $checkout_payment_url = $order->get_checkout_payment_url(true);
-            } else {
+            } else
+            {
                 /* 2.0.0 */
                 $checkout_payment_url = get_permalink(get_option('woocommerce_pay_page_id'));
             }
@@ -377,28 +414,35 @@ function jeeb_init_payment_gateway()
         }
 
         // Process callbacks from Jeeb
-        public function process_response($order_id)
+        public function process_response($order1)
         {
-            global $woocommerce;
-
+            $order_id = $order1->get_id();
             $order = new WC_Order($order_id);
+            if ($order->get_payment_method() == $this->id)
+            {
+                $state = filter_input(INPUT_POST, 'state');
+                $refund = filter_input(INPUT_POST, 'refund', FILTER_VALIDATE_BOOLEAN);
+                switch ($state)
+                {
+                    case 'PendingConfirmation':
 
-            switch ($_REQUEST['state']) {
-                case 'PendingConfirmation':
-                    if ($_REQUEST['refund'] == 'true') {
-                        echo "<h3>Oops!</h3><p>Your Payment will be rejected. To pay again please go to checkout page.</p>";
-                    } else {
-                        echo "<h3>Thank you!</h3><p>We're waiting for your transaction to gets confirmed. Please be patient.</p>";
-                    }
-                    break;
+                        if ($refund == true)
+                        {
+                            echo "<h3>Oops!</h3><p>Your Payment will be rejected. To pay again please go to checkout page.</p>";
+                        } else
+                        {
+                            echo "<h3>Thank you!</h3><p>We're waiting for your transaction to gets confirmed. Please be patient.</p>";
+                        }
+                        break;
 
-                case 'Expired':
-                    echo "<h3>Oops!</h3><p>Your Payment is expired or canceled. To pay again please go to checkout page.</p>";
-                    break;
+                    case 'Expired':
+                        echo "<h3>Oops!</h3><p>Your Payment is expired or canceled. To pay again please go to checkout page.</p>";
+                        break;
 
-                default:
-                    echo "<h3>Oops!</h3><p>Payment failed. To pay again please go to checkout page.</p>";
-                    break;
+                    default:
+                        echo "<h3>Oops!</h3><p>Payment failed. To pay again please go to checkout page.</p>";
+                        break;
+                }
             }
         }
 
@@ -410,7 +454,8 @@ function jeeb_init_payment_gateway()
             $postdata = file_get_contents("php://input");
             $json = json_decode($postdata, true);
 
-            if (isset($json["token"])) {
+            if (isset($json["token"]))
+            {
                 global $woocommerce;
                 global $wpdb;
 
@@ -418,14 +463,18 @@ function jeeb_init_payment_gateway()
 
                 $token = $json["token"];
 
-                if ($json['state'] == 'PendingTransaction') {
+                if ($json['state'] == 'PendingTransaction')
+                {
                     $order->add_order_note('Jeeb: Pending transaction.');
-                } else if ($json['state'] == 'PendingConfirmation') {
+                } else if ($json['state'] == 'PendingConfirmation')
+                {
 
                     // Reduce stock level
-                    if (function_exists('wc_reduce_stock_levels')) {
+                    if (function_exists('wc_reduce_stock_levels'))
+                    {
                         wc_reduce_stock_levels($order_id);
-                    } else {
+                    } else
+                    {
                         $order->reduce_order_stock();
                     }
 
@@ -436,28 +485,38 @@ function jeeb_init_payment_gateway()
                     $order->set_transaction_id($json['referenceNo']);
 
                     // Transaction done successfully but not yet confirmed, so set the Order as On-Hold (Awaiting Payment).
-                    if ($json['refund'] == false) {
+                    if ($json['refund'] == false)
+                    {
                         $order->update_status('on-hold', 'Jeeb: Pending confirmation.');
-                    } else {
+                    } else
+                    {
                         // Transaction amount was not equal to payable amount, so set the Order as Refunded.
                         $order->update_status('Refunded', 'Jeeb: Payment will be rejected.');
                     }
-
-                } else if ($json['state'] == 'Completed') {
+                } else if ($json['state'] == 'Completed')
+                {
                     $order->add_order_note('Jeeb: Confirmation occurred for transaction.');
 
-                    $is_confirmed = $this->confirm_payment($token);
-                    if ($is_confirmed) {
+                    $res_confirmed = $this->confirm_payment($token);
+                    $is_confirmed = $res_confirmed['res'];
+                    if ($is_confirmed)
+                    {
                         $order->add_order_note('Jeeb: Merchant confirmation obtained. Payment is completed.');
                         $order->payment_complete();
-                    } else {
+                    } else
+                    {
+                        $note = $res_confirmed['err'];
+                        $order->add_order_note($note);
                         $order->update_status('failed', 'Jeeb: Double spending avoided.');
                     }
-                } else if ($json['state'] == 'Expired') {
+                } else if ($json['state'] == 'Expired')
+                {
                     $order->update_status('cancelled', 'Jeeb: Payment is expired or canceled.');
-                } else if ($json['state'] == 'Rejected') {
+                } else if ($json['state'] == 'Rejected')
+                {
                     $order->add_order_note('Jeeb: Payment has been rejected.');
-                } else {
+                } else
+                {
                     $order->add_order_note('Jeeb: Unknown state received. Please report this incident.');
                 }
                 header("HTTP/1.1 200 OK");
@@ -467,12 +526,16 @@ function jeeb_init_payment_gateway()
         }
 
         /* Enqueue admin scripts */
+
         function enqueue_admin_scripts()
         {
-            if (is_admin()) {
+            if (is_admin())
+            {
                 wp_enqueue_style('jeeb_admin_style', plugins_url('admin.css', __FILE__));
                 wp_enqueue_script('jeeb_admin_script', plugins_url('admin.js', __FILE__), array('jquery'), '1.0', true);
             }
         }
+
     }
+
 }
